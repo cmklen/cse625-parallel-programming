@@ -1,0 +1,38 @@
+# depslib dependency file v1.0
+1660754977 source:d:\class\cse625\_codeblocks_projects\timerdemo\dot.cpp
+	<vector>
+	<thread>
+	<mutex>
+
+1661263655 source:d:\class\cse625\_codeblocks_projects\timerdemo\main.cpp
+	<iostream>
+	<vector>
+	"include/hpc_helpers.hpp"
+	"chronoTimer.h"
+	"timers.h"
+	"chTimer.h"
+
+1535470022 d:\class\cse625\_codeblocks_projects\timerdemo\chronotimer.h
+	<iostream>
+	<chrono>
+
+1534731206 d:\class\cse625\_codeblocks_projects\timerdemo\timers.h
+	<iostream>
+	<Windows.h>
+
+1440691814 d:\class\cse625\_codeblocks_projects\timerdemo\chtimer.h
+	<windows.h>
+	<stdint.h>
+	<mach/mach_time.h>
+	<time.h>
+
+1535475812 source:d:\class\cse625\_codeblocks_projects\timerdemo\timers.cpp
+	<iostream>
+	<Windows.h>
+
+1568914632 d:\class\cse625\_codeblocks_projects\timerdemo\include\hpc_helpers.hpp
+	<iostream>
+	<cstdint>
+	<chrono>
+	<type_traits>
+
