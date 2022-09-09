@@ -128,14 +128,14 @@ int main()
 	std::cout << "\nhpc_helpers.hpp timer tests\n";
 	hpc_helpersTimer(_N);
 
-	std::cout << "\nchrono timer tests\n";
-	chronoTimer(_N);
+	//std::cout << "\nchrono timer tests\n";
+	//chronoTimer(_N);
 
-	std::cout << "\nWinodows timer tests\n";
-	WindowsTimer(_N);
+	//std::cout << "\nWinodows timer tests\n";
+	//WindowsTimer(_N);
 
-	std::cout << "\nchTimer tests\n";
-	chTimerTest(_N);
+	//std::cout << "\nchTimer tests\n";
+	//chTimerTest(_N);
 
 	std::cout << "\n============== Timer tests done. ============\n\n";
 
