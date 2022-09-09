@@ -36,3 +36,40 @@
 	<chrono>
 	<type_traits>
 
+1662656785 source:c:\users\cmkle\git\cse625-parallel-programming\project1\lib\timerdemo\dot.cpp
+	<vector>
+	<thread>
+	<mutex>
+
+1662679380 source:c:\users\cmkle\git\cse625-parallel-programming\project1\lib\timerdemo\main.cpp
+	<iostream>
+	<vector>
+	"include/hpc_helpers.hpp"
+	"chronoTimer.h"
+	"timers.h"
+	"chTimer.h"
+
+1662656786 c:\users\cmkle\git\cse625-parallel-programming\project1\lib\timerdemo\include\hpc_helpers.hpp
+	<iostream>
+	<cstdint>
+	<chrono>
+	<type_traits>
+
+1662678719 c:\users\cmkle\git\cse625-parallel-programming\project1\lib\timerdemo\chronotimer.h
+	<iostream>
+	<chrono>
+
+1662656785 c:\users\cmkle\git\cse625-parallel-programming\project1\lib\timerdemo\timers.h
+	<iostream>
+	<Windows.h>
+
+1662656785 c:\users\cmkle\git\cse625-parallel-programming\project1\lib\timerdemo\chtimer.h
+	<windows.h>
+	<stdint.h>
+	<mach/mach_time.h>
+	<time.h>
+
+1662656785 source:c:\users\cmkle\git\cse625-parallel-programming\project1\lib\timerdemo\timers.cpp
+	<iostream>
+	<Windows.h>
+

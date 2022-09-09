@@ -95,8 +95,8 @@ Consider the Weak (Efficiency) Scalability Analysis for n = 1024×p as
  
 Use the distributed computing algorithm given in the 01_Introduction PowerPoint (in particular, slide 19) to compute the sum of two arrays. Write a Python notebook called p4.ipynb to perform tasks, 4.1-4.3. For this problem, the notebook, 01_Speedup.ipynb, should be very helpful to write your notebook.
 
-### 4.1 Write a Python function to compute the computing time, T. The following is the 
-      signature of the function.
+### 4.1 Write a Python function to compute the computing time, T.
+ The following is the signature of the function.
        
      def T (p, n, α, β): 
      # Returns computing time
@@ -108,7 +108,8 @@ Use the distributed computing algorithm given in the 01_Introduction PowerPoint 
    
     Write some Python code to test the function.
 
-### 4.2 Write a Python function to compute the Speedup, S. The following is the signature of 
+### 4.2 Write a Python function to compute the Speedup, S. 
+The following is the signature of 
         the function.
 
          def S (p, n, α, β): 
