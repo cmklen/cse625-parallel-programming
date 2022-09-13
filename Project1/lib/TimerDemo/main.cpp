@@ -119,7 +119,7 @@ void chTimerTest(int N)
 	std::cout << "MutiThreading dot product result = " << dot << std::endl;
 }
 
-#define _N	(17000000)		// Number of vector elements
+#define _N	(16777218)		// Number of vector elements
 
 int main()
 {
