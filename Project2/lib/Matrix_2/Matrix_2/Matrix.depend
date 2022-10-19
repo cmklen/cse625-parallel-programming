@@ -97,7 +97,7 @@
 	<iostream>
 	<iostream>
 
-1666196805 source:c:\users\cmkle\git\cse625-parallel-programming\project2\lib\matrix_2\matrix_2\main.cpp
+1666209373 source:c:\users\cmkle\git\cse625-parallel-programming\project2\lib\matrix_2\matrix_2\main.cpp
 	<iostream>
 	<random>
 	"chronoTimer.h"
@@ -107,10 +107,13 @@
 1666039293 source:c:\users\cmkle\git\cse625-parallel-programming\project2\lib\matrix_2\matrix_2\utility.cpp
 	<math.h>
 
-1666196877 source:c:\users\cmkle\git\cse625-parallel-programming\project2\lib\matrix_2\matrix_2\matrix.cpp
+1666204226 source:c:\users\cmkle\git\cse625-parallel-programming\project2\lib\matrix_2\matrix_2\matrix.cpp
 	<cstdlib>
 	<cstdio>
 	<iostream>
 	<immintrin.h>
 	<vector>
+	<thread>
+	<mutex>
+	<math.h>
 
