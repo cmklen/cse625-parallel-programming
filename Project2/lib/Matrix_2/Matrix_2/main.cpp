@@ -17,7 +17,7 @@ void matrixMul_tmm (float* C, float* A, float* B, int RA, int CA, int CB);
 void matrixMul_AVX_tmm(float *A, float *B, float *C, int RA, int CA, int CB,
                        bool ToTranspose = true);
 float AVXDot(float* A, float* B, int RA, int CA, int CB);
-float SequentialDot(float * v1, float * v2, int n);
+float SequentialDot(const std::vector<float> &v1, const std::vector<float> &v2);
 
 // Functions defined in gemm.cpp
 void sgemm(char transa, char transb, int m, int n, int k,
@@ -145,25 +145,27 @@ void AVXDot_timing(float *A, float* B,
 {
      float dot;
     StartTimer();
-     dot =   AVXDot(A, B, ROWA, COLA, COLB);
+     dot = AVXDot(A, B, ROWA, COLA, COLB);
     std::cout << "AVXDot time: " << StopTimer() << " seconds\n";
-    std::cout << "\t Dot = " << dot << "\n\n";
+    std::cout << "\t AVX Dot Result = " << dot << "\n\n";
 }
 
-void SeqDot_timing(float *A, float* B, int n)
+void SeqDot_timing(std::vector<float> &v1, std::vector<float> &v2)
 {
     float dot;
     StartTimer();
-    dot = SequentialDot(A, B, n);
-    std::cout << "SeqDot time: " << StopTimer() << " seconds\n";
+    dot = SequentialDot(v1, v2);
+    std::cout << "SeqDot time: " ;//<< StopTimer() << " seconds\n";
     std::cout << "\t Seq Dot Result = " << dot << "\n\n";
 }
 
+
+
 //============== End of Timing Test functions definitions ================
-#define SIZE 3
-#define ROWA SIZE
-#define COLA SIZE
-#define COLB SIZE
+#define VSIZE 64000000
+#define ROWA 500
+#define COLA 500
+#define COLB 500
 #define ROWB COLA
 #define ROWC ROWA
 #define COLC COLB
@@ -195,14 +197,7 @@ int main()
 	for (int i = 0; i < ROWC * COLC; ++i)
 		C[i] = Ref_C[i] = 0;
 
-    for(int i = 0; i < SIZE; ++i){
-		std::cout  << A[i]<< ",";
-    }
-    std::cout  <<std::endl;
-       for(int i = 0; i < SIZE; ++i){
-		std::cout  << B[i]<< ",";
-    }
-    std::cout  <<std::endl;
+    std::vector<float> v1(VSIZE, 1.0f), v2(VSIZE, 1.0f);
 	//A[0] = .1;
 	//A[1] = .2;
 	//A[2] = .3;
@@ -221,13 +216,12 @@ int main()
 
     //AVX_tmm_Timing(Ref_C, C, A, B, ROWA, COLA, COLB, false);
 
-     //group_timing(Ref_C, C, A, B, ROWA, COLA, COLB, true);
+    //group_timing(Ref_C, C, A, B, ROWA, COLA, COLB, true);
 
     //sgemm_Timing(Ref_C, C, A, B, ROWA, COLA, COLB, true);
-
-     std::cout << "calling dot";
-    AVXDot_timing(A, B, ROWA, COLA, COLB);
-    SeqDot_timing(A, B, SIZE);
+    std::cout << "start seq:" << std::endl;
+    SeqDot_timing(v1, v2);
+    //AVXDot_timing(A, B, ROWA, COLA, COLB);
 
     _aligned_free(A);
     _aligned_free(B);

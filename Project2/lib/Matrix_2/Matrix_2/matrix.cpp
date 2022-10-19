@@ -4,7 +4,7 @@
 #include <cstdio>
 #include <iostream>
 #include <immintrin.h>
-
+#include <vector>
 //======================================================================================
 // matrixMul_RowMajor (float* C, float* A, float* B, int RA, int CA, int CB)
 // Note: this is the base-line matrix multiplication C++ implementation on
@@ -209,34 +209,28 @@ void matrixMul_AVX_tmm(float* C, float* A, float* B, int RA, int CA, int CB,
 
 float AVXDot(float* A, float* B, int RA, int CA, int CB)
 {
-    std::cout << "before load";
     __m256 C = _mm256_setzero_ps();
-    for (int i = 0; i < RA; i++)
+
+	for (int i = 0; i < RA; i+=8)
 	{
-		for (int j = 0; j < CB; j++)
-		{
-			__m256 X = _mm256_setzero_ps();
-			for (int k = 0; k < CA; k += 8)
-			{
-				const __m256 AV = _mm256_loadu_ps(A + i * CA + k);
-				const __m256 BV = _mm256_loadu_ps(B + j * CA + k);
-				X = _mm256_dp_ps(AV, BV, 0xff);
-			}
-            std::cout << "C[i * RA + j: " << hsum_avx(X) << std::endl;
-			C[i * RA + j] = hsum_avx(X);
-			//C[i * RA + j] = hsum_avx_2(X);
-		}
+		__m256 X = _mm256_setzero_ps();
+		const __m256 mmA = _mm256_loadu_ps(A + i);
+		const __m256 mmB = _mm256_loadu_ps(B + i);
+		X = _mm256_mul_ps(mmA, mmB);
+		C[i/8] = hsum256_ps_avx(X);
+		std::cout << "Sub Sum:" << hsum256_ps_avx(X) << std::endl;
+		std::cout << "Cum Sum:" << hsum256_ps_avx(C) << std::endl;
 	}
-	std::cout << "sum: " << C[0] << std::endl;
-	return hsum_avx(C);
+	return hsum256_ps_avx(C);
 }
 
-float SequentialDot(float * v1, float * v2, int n)
+float SequentialDot(const std::vector<float> &v1, const std::vector<float> &v2)
 {
 	float result = 0;
-
-	for (int i = 0; i < n; ++i)
+ 	size_t length = (v1.size() <= v2.size() ? v1.size() : v2.size());
+	for (int i = 0; i < length; ++i)
+	{
 		result += v1[i] * v2[i];
-
+	}
 	return result;
 }
