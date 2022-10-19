@@ -18,7 +18,7 @@ void matrixMul_AVX_tmm(float *A, float *B, float *C, int RA, int CA, int CB,
                        bool ToTranspose = true);
 float AVXDot(const std::vector<float> &v1, const std::vector<float> &v2);
 float SequentialDot(const std::vector<float> &v1, const std::vector<float> &v2);
-
+void matrixMul_RowMajor_threaded(float *C, float *A, float *B, int RA, int CA, int CB, int num_threads);
 // Functions defined in gemm.cpp
 void sgemm(char transa, char transb, int m, int n, int k,
 	float alpha, float a[], int lda, float b[], int ldb, float beta,
@@ -116,6 +116,15 @@ void AVX_tmm_Timing (float* Ref_C, float *C, float *A, float* B,
         //absolute_dist (C, Ref_C, ROWA * COLA) << "\n";
 }
 
+void ThreadedMatMul_timing(float* Ref_C, float *C, float *A, float* B,
+                int ROWA, int COLA, int COLB, int N)
+{
+    StartTimer();
+        matrixMul_RowMajor_threaded(Ref_C, A, B, ROWA, COLA, COLB, N);
+    std::cout << "matrixMul_RowMajor_threaded time: " << StopTimer() << " seconds\n";
+    std::cout << "\t Ref_C[0] = " << Ref_C[0] << "\n\n";
+}
+
 void group_timing(float* Ref_C, float *C, float *A, float* B,
                 int ROWA, int COLA, int COLB, bool baseLine = false)
 {
@@ -154,17 +163,18 @@ void SeqDot_timing(std::vector<float> &v1, std::vector<float> &v2)
     float dot;
     StartTimer();
     dot = SequentialDot(v1, v2);
-    std::cout << "SeqDot time: " ;//<< StopTimer() << " seconds\n";
+    std::cout << "SeqDot time: " << StopTimer() << " seconds\n";
     std::cout << "\t Seq Dot Result = " << dot << "\n\n";
 }
 
 
 
 //============== End of Timing Test functions definitions ================
-#define VSIZE 6400000
-#define ROWA 500
-#define COLA 500
-#define COLB 500
+#define SIZE 6400
+#define THREADCOUNT 16
+#define ROWA SIZE
+#define COLA SIZE
+#define COLB SIZE
 #define ROWB COLA
 #define ROWC ROWA
 #define COLC COLB
@@ -196,14 +206,7 @@ int main()
 	for (int i = 0; i < ROWC * COLC; ++i)
 		C[i] = Ref_C[i] = 0;
 
-    std::vector<float> v1(VSIZE, 1.0f), v2(VSIZE, 1.0f);
-	//A[0] = .1;
-	//A[1] = .2;
-	//A[2] = .3;
-
-	//B[0] = .1;
-	//B[1] = .5;
-	//B[2] = .7;
+    // std::vector<float> v1(VSIZE, 1.0f), v2(VSIZE, 1.0f);
 
 	std::cout << "allocating and initializing matrices using uniform distribution(0,1) time: "
 		<< StopTimer() << " seconds\n\n";
@@ -218,8 +221,10 @@ int main()
     //group_timing(Ref_C, C, A, B, ROWA, COLA, COLB, true);
 
     //sgemm_Timing(Ref_C, C, A, B, ROWA, COLA, COLB, true);
-    SeqDot_timing(v1, v2);
-    AVXDot_timing(v1, v2);
+    // SeqDot_timing(v1, v2);
+    // AVXDot_timing(v1, v2);
+
+    ThreadedMatMul_timing(Ref_C, C, A, B, ROWA, COLA, COLB, THREADCOUNT);
 
     _aligned_free(A);
     _aligned_free(B);

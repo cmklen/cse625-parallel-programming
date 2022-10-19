@@ -5,6 +5,9 @@
 #include <iostream>
 #include <immintrin.h>
 #include <vector>
+#include <thread>
+#include <mutex>
+#include <math.h>
 //======================================================================================
 // matrixMul_RowMajor (float* C, float* A, float* B, int RA, int CA, int CB)
 // Note: this is the base-line matrix multiplication C++ implementation on
@@ -210,17 +213,17 @@ float AVXDot(const std::vector<float> &v1, const std::vector<float> &v2)
 {
 	__m256 C = _mm256_setzero_ps();
 	size_t length = (v1.size() <= v2.size() ? v1.size() : v2.size());
-	float sum;
-	
+	float result;
+
 	for (int i = 0; i < length; i += 8)
 	{
 		__m256 X = _mm256_setzero_ps();
 		const __m256 mmA = _mm256_loadu_ps((float *)&v1[i]);
 		const __m256 mmB = _mm256_loadu_ps((float *)&v2[i]);
 		X = _mm256_mul_ps(mmA, mmB);
-		sum += hsum256_ps_avx(X);
+		result += hsum256_ps_avx(X);
 	}
-	return sum;
+	return result;
 }
 
 float SequentialDot(const std::vector<float> &v1, const std::vector<float> &v2)
@@ -232,4 +235,63 @@ float SequentialDot(const std::vector<float> &v1, const std::vector<float> &v2)
 		result += v1[i] * v2[i];
 	}
 	return result;
+}
+
+// Utility function
+std::vector<int> bounds(int parts, int mem)
+{
+	std::vector<int> bnd;
+	int delta = mem / parts;
+	int reminder = mem % parts;
+	int N1 = 0, N2 = 0;
+	bnd.push_back(N1);
+	for (int i = 0; i < parts; ++i)
+	{
+		N2 = N1 + delta;
+		if (i == parts - 1)
+			N2 += reminder;
+		bnd.push_back(N2);
+		N1 = N2;
+	}
+	return bnd;
+}
+
+static std::mutex barrier;
+
+void matrixMul_RowMajor_threaded(float *C, float *A, float *B, int RA, int CA, int CB, int num_threads)
+{
+	// use lambda function
+	auto multMatBlock = [&](const int& id, float *C, float *A, float *B, int RA, int CA, int CB)
+	{
+		// compute chunk size, lower and upper for task id
+		const int chunk = (RA + num_threads-1) / num_threads;
+		const int lower = id * chunk;
+		const int upper = std::min(lower+chunk, RA);
+
+		int row, col;
+		for (row = lower; row < upper; row++)
+		{
+			for (col = 0; col < CB; ++col)
+			{
+				float Cvalue = 0;
+				for (int k = 0; k < CA; k++)
+					Cvalue += A[row * CA + k] * B[k * CB + col];
+				C[row * CB + col] = Cvalue;
+			}
+		}
+	};
+
+	std::vector<std::thread> threads;
+	for (int id = 0; id < num_threads; id++)
+	{
+		std::cout<< "Creating thread Id: " << id << std::endl;
+		threads.emplace_back(multMatBlock, id, C, A, B, RA, CA, CB);
+	}
+
+	for (auto& thread : threads)
+	{
+		thread.join();
+	}
+
+	std::cout<< "Threaded Matrix Multiplicaiton Complete" << std::endl;
 }
