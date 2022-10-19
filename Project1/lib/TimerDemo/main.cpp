@@ -119,14 +119,46 @@ void chTimerTest(int N)
 	std::cout << "MutiThreading dot product result = " << dot << std::endl;
 }
 
-#define _N	(16777218)		// Number of vector elements
+void seqDotTest(int N)
+{
+	double time;
+	float dot;
+	chTimerTimestamp start, stop;
+
+	std::vector<float> v1(N, 1.0f), v2(N, 1.0f);
+
+	chTimerGetTime(&start);
+	dot = SequentialDot(v1, v2);
+	chTimerGetTime(&stop);
+	time = chTimerElapsedTime(&start, &stop);
+	std::cout << "Sequential time measured by chTimer = " << time << " seconds\n";
+	std::cout << "Sequential dot product result = " << dot << std::endl;
+}
+
+void avxDotTest(int N)
+{
+	double time;
+	float dot;
+	chTimerTimestamp start, stop;
+
+	std::vector<float> v1(N, 1.0f), v2(N, 1.0f);
+
+	chTimerGetTime(&start);
+	//dot = AVXDot(v1, v2);
+	chTimerGetTime(&stop);
+	time = chTimerElapsedTime(&start, &stop);
+	std::cout << "AVX time measured by chTimer = " << time << " seconds\n";
+	std::cout << "AVX dot product result = " << dot << std::endl;
+}
+
+#define _N	(64000000)		// Number of vector elements
 
 int main()
 {
 	std::cout << "Dot product of two ones float vectors of length " << _N << " ----->\n";
 
 	std::cout << "\nhpc_helpers.hpp timer tests\n";
-	hpc_helpersTimer(_N);
+	//hpc_helpersTimer(_N);
 
 	//std::cout << "\nchrono timer tests\n";
 	//chronoTimer(_N);
@@ -136,6 +168,8 @@ int main()
 
 	//std::cout << "\nchTimer tests\n";
 	//chTimerTest(_N);
+
+	seqDotTest(_N);
 
 	std::cout << "\n============== Timer tests done. ============\n\n";
 

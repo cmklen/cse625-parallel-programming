@@ -1,0 +1,115 @@
+# depslib dependency file v1.0
+1664749651 source:d:\class\cse625\_codeblocks_projects\matrix\main.cpp
+	<iostream>
+	<random>
+	"chronoTimer.h"
+
+1663257111 source:d:\class\cse625\_codeblocks_projects\matrix\chronotimer.cpp
+	<chrono>
+
+1631405584 d:\class\cse625\_codeblocks_projects\matrix\chronotimer.h
+
+1663252637 source:d:\class\cse625\_codeblocks_projects\matrix\matrixmuli.cpp
+	<cstdlib>
+	<cstdio>
+	<cassert>
+	<random>
+	"chronoTimer.h"
+
+1664749651 source:d:\class\cse625\_codeblocks_projects\matrix\matrix.cpp
+	<cstdlib>
+	<cstdio>
+	<immintrin.h>
+
+1663606737 source:d:\class\cse625\_codeblocks_projects\matrix\utility.cpp
+	<math.h>
+
+1663257111 source:d:\class\cecs625\_codeblocks_projects\matrix\chronotimer.cpp
+	<chrono>
+
+1664485378 source:d:\class\cecs625\_codeblocks_projects\matrix\matrix.cpp
+	<cstdlib>
+	<cstdio>
+	<immintrin.h>
+
+1631405584 d:\class\cecs625\_codeblocks_projects\matrix\chronotimer.h
+
+1663606737 source:d:\class\cecs625\_codeblocks_projects\matrix\utility.cpp
+	<math.h>
+
+1663432436 source:d:\class\cecs625\_codeblocks_projects\matrix\gemm.cpp
+	<stdlib.h>
+	<stdio.h>
+	<iostream>
+	<iostream>
+
+1663432436 source:d:\class\cse625\_codeblocks_projects\matrix\gemm.cpp
+	<stdlib.h>
+	<stdio.h>
+	<iostream>
+	<iostream>
+
+1664486046 source:d:\class\cecs625\_codeblocks_projects\matrix\main.cpp
+	<iostream>
+	<random>
+	"chronoTimer.h"
+
+1664751238 source:d:\class\cse625\_codeblocks_projects\matrix\avxtest.cpp
+	<iostream>
+	<cstdio>
+	<immintrin.h>
+
+1664751238 source:d:\class\cse625\_codeblocks_projects\matrix_2\avxtest.cpp
+	<iostream>
+	<cstdio>
+	<immintrin.h>
+
+1663257111 source:d:\class\cse625\_codeblocks_projects\matrix_2\chronotimer.cpp
+	<chrono>
+
+1663432436 source:d:\class\cse625\_codeblocks_projects\matrix_2\gemm.cpp
+	<stdlib.h>
+	<stdio.h>
+	<iostream>
+	<iostream>
+
+1664810960 source:d:\class\cse625\_codeblocks_projects\matrix_2\matrix.cpp
+	<cstdlib>
+	<cstdio>
+	<immintrin.h>
+
+1663606737 source:d:\class\cse625\_codeblocks_projects\matrix_2\utility.cpp
+	<math.h>
+
+1664810468 source:d:\class\cse625\_codeblocks_projects\matrix_2\main.cpp
+	<iostream>
+	<random>
+	"chronoTimer.h"
+
+1631405584 d:\class\cse625\_codeblocks_projects\matrix_2\chronotimer.h
+
+1666039292 source:c:\users\cmkle\git\cse625-parallel-programming\project2\lib\matrix_2\matrix_2\chronotimer.cpp
+	<chrono>
+
+1666039293 source:c:\users\cmkle\git\cse625-parallel-programming\project2\lib\matrix_2\matrix_2\gemm.cpp
+	<stdlib.h>
+	<stdio.h>
+	<iostream>
+	<iostream>
+
+1666139187 source:c:\users\cmkle\git\cse625-parallel-programming\project2\lib\matrix_2\matrix_2\main.cpp
+	<iostream>
+	<random>
+	"chronoTimer.h"
+
+1666039292 c:\users\cmkle\git\cse625-parallel-programming\project2\lib\matrix_2\matrix_2\chronotimer.h
+
+1666039293 source:c:\users\cmkle\git\cse625-parallel-programming\project2\lib\matrix_2\matrix_2\utility.cpp
+	<math.h>
+
+1666139717 source:c:\users\cmkle\git\cse625-parallel-programming\project2\lib\matrix_2\matrix_2\matrix.cpp
+	<cstdlib>
+	<cstdio>
+	<iostream>
+	<immintrin.h>
+

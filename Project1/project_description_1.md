@@ -99,7 +99,7 @@ Use the distributed computing algorithm given in the 01_Introduction PowerPoint 
  The following is the signature of the function.
        
      def T (p, n, α, β): 
-     # Returns computing time
+     # Returns computing time  
      # Input Parameters:
      # 	p number of processors (PEs)
      # 	n problem size, i.e., number of array elements
