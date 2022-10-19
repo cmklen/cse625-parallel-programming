@@ -34,12 +34,10 @@ float SequentialDot(const std::vector<float> &v1, const std::vector<float> &v2)
 {
 	size_t length = (v1.size() <= v2.size() ? v1.size() : v2.size());
 	float result = 0;
-
 	for (int i = 0; i < length; ++i)
 	{
 		result += v1[i] * v2[i];
 	}
-
 	return result;
 }
 
@@ -115,3 +113,6 @@ float ThreadDot(const std::vector<float> &v1, const std::vector<float> &v2)
 
 	return result;
 }
+
+
+
