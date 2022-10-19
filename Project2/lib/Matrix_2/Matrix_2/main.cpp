@@ -16,7 +16,7 @@ void matrixMul_ColMajor (float* C, float* A, float* B, int RA, int CA, int CB);
 void matrixMul_tmm (float* C, float* A, float* B, int RA, int CA, int CB);
 void matrixMul_AVX_tmm(float *A, float *B, float *C, int RA, int CA, int CB,
                        bool ToTranspose = true);
-float AVXDot(float* A, float* B, int RA, int CA, int CB);
+float AVXDot(const std::vector<float> &v1, const std::vector<float> &v2);
 float SequentialDot(const std::vector<float> &v1, const std::vector<float> &v2);
 
 // Functions defined in gemm.cpp
@@ -140,12 +140,11 @@ void group_timing(float* Ref_C, float *C, float *A, float* B,
 
 }
 
-void AVXDot_timing(float *A, float* B,
-                int ROWA, int COLA, int COLB)
+void AVXDot_timing(const std::vector<float> &v1, const std::vector<float> &v2)
 {
      float dot;
     StartTimer();
-     dot = AVXDot(A, B, ROWA, COLA, COLB);
+     dot = AVXDot(v1,v2);
     std::cout << "AVXDot time: " << StopTimer() << " seconds\n";
     std::cout << "\t AVX Dot Result = " << dot << "\n\n";
 }
@@ -162,7 +161,7 @@ void SeqDot_timing(std::vector<float> &v1, std::vector<float> &v2)
 
 
 //============== End of Timing Test functions definitions ================
-#define VSIZE 64000000
+#define VSIZE 6400000
 #define ROWA 500
 #define COLA 500
 #define COLB 500
@@ -219,9 +218,8 @@ int main()
     //group_timing(Ref_C, C, A, B, ROWA, COLA, COLB, true);
 
     //sgemm_Timing(Ref_C, C, A, B, ROWA, COLA, COLB, true);
-    std::cout << "start seq:" << std::endl;
     SeqDot_timing(v1, v2);
-    //AVXDot_timing(A, B, ROWA, COLA, COLB);
+    AVXDot_timing(v1, v2);
 
     _aligned_free(A);
     _aligned_free(B);
