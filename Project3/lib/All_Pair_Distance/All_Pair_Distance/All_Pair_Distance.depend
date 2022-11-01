@@ -1,0 +1,43 @@
+# depslib dependency file v1.0
+1664993240 source:d:\class\cse625\_codeblocks_projects\all_pair_distance\4_all_pair.cpp
+	<iostream>
+	<cstdint>
+	<vector>
+	<thread>
+	<algorithm>
+	"include/hpc_helpers.hpp"
+	"include/binary_IO.hpp"
+	<mutex>
+	<atomic>
+
+1568914632 d:\class\cse625\_codeblocks_projects\all_pair_distance\include\hpc_helpers.hpp
+	<iostream>
+	<cstdint>
+	<chrono>
+	<type_traits>
+
+1632438547 d:\class\cse625\_codeblocks_projects\all_pair_distance\include\binary_io.hpp
+	<string>
+	<fstream>
+	<iostream>
+
+1631408468 source:d:\class\cse625\_codeblocks_projects\all_pair_distance\chronotimer.cpp
+	<chrono>
+
+1665203489 source:d:\class\cse625\_codeblocks_projects\all_pair_distance\main.cpp
+	<iostream>
+
+1665243853 source:d:\class\cse625\_codeblocks_projects\all_pair_distance\all_pair.cpp
+	<iostream>
+	<cstdint>
+	<vector>
+	<thread>
+	<algorithm>
+	"include/hpc_helpers.hpp"
+	"include/binary_IO.hpp"
+	<mutex>
+	<atomic>
+	"chronoTimer.h"
+
+1631405584 d:\class\cse625\_codeblocks_projects\all_pair_distance\chronotimer.h
+
