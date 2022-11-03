@@ -298,7 +298,7 @@ int all_pairs(uint64_t nRows = 60000)
     // The sequential computing took about 30 min to complete
     std::cout << "Starting sequential_all_pairs ...\n";
 	StartTimer ();
-        //sequential_all_pairs(mnist, all_pair, nRows, cols);
+        sequential_all_pairs(mnist, all_pair, nRows, cols);
 	std::cout << "\tsequential_all_pairs time = " << StopTimer() << "\n";
 	std::cout << "\tall_pair[1000] = " << all_pair[1000] << "\n\n";
 
@@ -309,7 +309,7 @@ int all_pairs(uint64_t nRows = 60000)
 
 	std::cout << "Starting block_all_pairs ...\n";
     StartTimer();
-        block_all_pairs(mnist, all_pair, nRows, cols, 12);
+        //block_all_pairs(mnist, all_pair, nRows, cols, 12);
     std::cout << "\tBlock_all_pairs time = " << StopTimer() << "\n";
     std::cout << "\tall_pair[1000] = " << all_pair[1000] << "\n\n";
 
@@ -317,7 +317,7 @@ int all_pairs(uint64_t nRows = 60000)
     // for nRows = 60,000 using 12 threads and chunk size 2 on DC119 computer
     std::cout << "Starting block_cyclic_all_pairs ...\n";
     StartTimer();
-        block_cyclic_all_pairs(mnist, all_pair, nRows, cols, 12, 2);
+        //block_cyclic_all_pairs(mnist, all_pair, nRows, cols, 12, 2);
     std::cout << "\tblock_cyclic_all_pairs time = " << StopTimer() << "\n";
     std::cout << "\tall_pair[1000] = " << all_pair[1000] << "\n\n";
 
@@ -325,7 +325,7 @@ int all_pairs(uint64_t nRows = 60000)
     // for nRows = 60,000 using 12 threads and chunk size 2 on DC 119 computers
     std::cout << "Starting dynamic_all_pairs ...\n";
     StartTimer();
-	dynamic_all_pairs(mnist, all_pair, nRows, cols,12,2);
+	//dynamic_all_pairs(mnist, all_pair, nRows, cols,12,2);
     std::cout << "\tdynamic_all_pairs time = " << StopTimer() << "\n";
     std::cout << "\tall_pair[1000] = " << all_pair[1000] << "\n\n";
 
