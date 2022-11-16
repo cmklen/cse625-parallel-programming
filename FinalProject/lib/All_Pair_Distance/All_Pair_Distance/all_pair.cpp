@@ -1,48 +1,46 @@
+#include <mutex>
+#include <atomic>
 #include <iostream>
-#include <cstdint>						// uint64_t
-#include <vector>						// std::vector
-#include <thread>						// std::thread
-#include <algorithm>					// std::min
-#include "include/hpc_helpers.hpp"		// timers, no_init_t
-#include "include/binary_IO.hpp"		// load_binary
+#include <cstdint>                 // uint64_t
+#include <vector>                  // std::vector
+#include <thread>                  // std::thread
+#include <algorithm>               // std::min
+#include "include/hpc_helpers.hpp" // timers, no_init_t
+#include "include/binary_IO.hpp"   // load_binary
+#include "omp.h"
+#include "chronoTimer.h"
 
-void sequential_all_pairs(
-    std::vector<float>& mnist,		    // rowsXcols matrix
-    std::vector<float>& all_pair,		// rowsXrows matrix
-    uint64_t rows,						// rows: number of  images
-    uint64_t cols)						// cols: number of pixels per image
+typedef void (*AllPairsWorker_t)(
+    std::vector<float>&,
+    std::vector<float>&,
+    uint64_t,
+    uint64_t,
+    uint64_t,
+    uint64_t);
+
+typedef struct
 {
-    // Compute distance for all entries below the diagonal
-    for (uint64_t i = 0; i < rows; i++)
-    {
-        for (uint64_t I = 0; I <= i; I++)
-        {
-            // compute squared Euclidean distance
-            float accum = float(0);
-            for (uint64_t j = 0; j < cols; j++)
-            {
-                float residue = mnist[i*cols+j] - mnist[I*cols+j];
-                accum += residue * residue;
-            }
-
-            // write Delta[i,i'] = Delta[i',i] = dist(i, i')
-            all_pair[i*rows+I] = all_pair[I*rows+i] = accum;
-        }
-    }
-}
+    std::vector<float>mnist;
+    std::vector<float>allPairs;
+    uint64_t rows;
+    uint64_t cols;
+    uint64_t threads;
+    uint64_t chunksize;
+} AllPairWorkerData_t;
 
 // block work distribution
 void block_all_pairs(
-    std::vector<float>& mnist,
-    std::vector<float>& all_pair,
+    std::vector<float> &mnist,
+    std::vector<float> &all_pair,
     uint64_t rows,
     uint64_t cols,
-    uint64_t num_threads = 64)
+    uint64_t num_threads = 64,
+    uint64_t unused = 0)
 {
-    auto block = [&] (const uint64_t& id) -> void
+    auto block = [&](const uint64_t &id) -> void
     {
         // pre-compute offset and stride
-        uint64_t chunk_size = (rows + num_threads -1) / num_threads;
+        uint64_t chunk_size = (rows + num_threads - 1) / num_threads;
         const uint64_t off = id * chunk_size;
         const uint64_t str = num_threads * chunk_size;
 
@@ -50,7 +48,7 @@ void block_all_pairs(
         for (uint64_t lower = off; lower < rows; lower += str)
         {
             // compute the upper border of the block (exclusive)
-            const uint64_t upper = std::min(lower+chunk_size,rows);
+            const uint64_t upper = std::min(lower + chunk_size, rows);
 
             // for all entries below the diagonal (i'=I)
             for (uint64_t i = lower; i < upper; i++)
@@ -61,12 +59,12 @@ void block_all_pairs(
                     float accum = float(0);
                     for (uint64_t j = 0; j < cols; j++)
                     {
-                        float residue = mnist[i*cols+j] - mnist[I*cols+j];
+                        float residue = mnist[i * cols + j] - mnist[I * cols + j];
                         accum += residue * residue;
                     }
 
                     // write Delta[i,i'] = Delta[i',i]
-                    all_pair[i*rows+I] = all_pair[I*rows+i] = accum;
+                    all_pair[i * rows + I] = all_pair[I * rows + i] = accum;
                 }
             }
         }
@@ -78,30 +76,30 @@ void block_all_pairs(
     for (uint64_t id = 0; id < num_threads; id++)
         threads.emplace_back(block, id);
 
-    for (auto& thread : threads)
+    for (auto &thread : threads)
         thread.join();
 }
 
 // block cyclic work distribution
 void block_cyclic_all_pairs(
-    std::vector<float>& mnist,
-    std::vector<float>& all_pair,
+    std::vector<float>&mnist,
+    std::vector<float>&all_pair,
     uint64_t rows,
     uint64_t cols,
     uint64_t num_threads = 64,
     uint64_t chunk_size = 64 / sizeof(float))
 {
-    auto block_cyclic = [&] (const uint64_t& id) -> void
+    auto block_cyclic = [&](const uint64_t &id) -> void
     {
         // pre-compute offset and stride
-        const uint64_t off = id*chunk_size;
-        const uint64_t str = num_threads*chunk_size;
+        const uint64_t off = id * chunk_size;
+        const uint64_t str = num_threads * chunk_size;
 
         // for each block of size chunk_size in cyclic order
         for (uint64_t lower = off; lower < rows; lower += str)
         {
             // compute the upper border of the block (exclusive)
-            const uint64_t upper = std::min(lower+chunk_size,rows);
+            const uint64_t upper = std::min(lower + chunk_size, rows);
 
             // for all entries below the diagonal (i'=I)
             for (uint64_t i = lower; i < upper; i++)
@@ -112,12 +110,12 @@ void block_cyclic_all_pairs(
                     float accum = float(0);
                     for (uint64_t j = 0; j < cols; j++)
                     {
-                        float residue = mnist[i*cols+j] - mnist[I*cols+j];
+                        float residue = mnist[i * cols + j] - mnist[I * cols + j];
                         accum += residue * residue;
                     }
 
                     // write Delta[i,i'] = Delta[i',i]
-                    all_pair[i*rows+I] = all_pair[I*rows+i] = accum;
+                    all_pair[i * rows + I] = all_pair[I * rows + i] = accum;
                 }
             }
         }
@@ -129,27 +127,24 @@ void block_cyclic_all_pairs(
     for (uint64_t id = 0; id < num_threads; id++)
         threads.emplace_back(block_cyclic, id);
 
-    for (auto& thread : threads)
+    for (auto &thread : threads)
         thread.join();
 }
-
-#include <mutex>
-#include <atomic>
 
 std::mutex mutex;
 
 void dynamic_all_pairs(
-    std::vector<float>& mnist,
-    std::vector<float>& all_pair,
+    std::vector<float> &mnist,
+    std::vector<float> &all_pair,
     uint64_t rows,
     uint64_t cols,
-    uint64_t num_threads=64,
-    uint64_t chunk_size=64/sizeof(float))
+    uint64_t num_threads = 64,
+    uint64_t chunk_size = 64 / sizeof(float))
 {
     // declare mutex and current lower index
     uint64_t global_lower = 0;
 
-    auto dynamic_block_cyclic = [&] (const uint64_t& id ) -> void
+    auto dynamic_block_cyclic = [&](const uint64_t &id) -> void
     {
         // assume we have not done anything
         uint64_t lower = 0;
@@ -160,12 +155,12 @@ void dynamic_all_pairs(
             // update lower row with global lower row
             {
                 std::lock_guard<std::mutex> lock_guard(mutex);
-                       lower  = global_lower;
+                lower = global_lower;
                 global_lower += chunk_size;
             }
 
             // compute the upper border of the block (exclusive)
-            const uint64_t upper = std::min(lower+chunk_size,rows);
+            const uint64_t upper = std::min(lower + chunk_size, rows);
 
             // for all entries below the diagonal (i'=I)
             for (uint64_t i = lower; i < upper; i++)
@@ -176,12 +171,12 @@ void dynamic_all_pairs(
                     float accum = float(0);
                     for (uint64_t j = 0; j < cols; j++)
                     {
-                        float residue = mnist[i*cols+j] - mnist[I*cols+j];
+                        float residue = mnist[i * cols + j] - mnist[I * cols + j];
                         accum += residue * residue;
                     }
 
                     // write Delta[i,i'] = Delta[i',i]
-                    all_pair[i*rows+I] = all_pair[I*rows+i] = accum;
+                    all_pair[i * rows + I] = all_pair[I * rows + i] = accum;
                 }
             }
         }
@@ -193,22 +188,22 @@ void dynamic_all_pairs(
     for (uint64_t id = 0; id < num_threads; id++)
         threads.emplace_back(dynamic_block_cyclic, id);
 
-    for (auto& thread : threads)
+    for (auto &thread : threads)
         thread.join();
 }
 
 void dynamic_all_pairs_rev(
-    std::vector<float>& mnist,
-    std::vector<float>& all_pair,
+    std::vector<float> &mnist,
+    std::vector<float> &all_pair,
     uint64_t rows,
     uint64_t cols,
-    uint64_t num_threads=64,
-    uint64_t chunk_size=64/sizeof(float))
+    uint64_t num_threads = 64,
+    uint64_t chunk_size = 64 / sizeof(float))
 {
     // declare mutex and current lower index
     uint64_t global_lower = 0;
 
-    auto dynamic_block_cyclic = [&] (const uint64_t& id ) -> void
+    auto dynamic_block_cyclic = [&](const uint64_t &id) -> void
     {
         // assume we have not done anything
         uint64_t lower = 0;
@@ -219,13 +214,13 @@ void dynamic_all_pairs_rev(
             // update lower row with global lower row
             {
                 std::lock_guard<std::mutex> lock_guard(mutex);
-                       lower  = global_lower;
+                lower = global_lower;
                 global_lower += chunk_size;
             }
 
             // compute the upper border of the block (exclusive)
-            const uint64_t upper = rows  >= lower ? rows-lower : 0;
-            const uint64_t LOWER = upper >= chunk_size ? upper-chunk_size : 0;
+            const uint64_t upper = rows >= lower ? rows - lower : 0;
+            const uint64_t LOWER = upper >= chunk_size ? upper - chunk_size : 0;
 
             // for all entries below the diagonal (i'=I)
             for (uint64_t i = LOWER; i < upper; i++)
@@ -236,13 +231,12 @@ void dynamic_all_pairs_rev(
                     float accum = float(0);
                     for (uint64_t j = 0; j < cols; j++)
                     {
-                        float residue = mnist[i*cols+j]
-                                        - mnist[I*cols+j];
+                        float residue = mnist[i * cols + j] - mnist[I * cols + j];
                         accum += residue * residue;
                     }
 
                     // write Delta[i,i'] = Delta[i',i]
-                    all_pair[i*rows+I] = all_pair[I*rows+i] = accum;
+                    all_pair[i * rows + I] = all_pair[I * rows + i] = accum;
                 }
             }
         }
@@ -254,82 +248,60 @@ void dynamic_all_pairs_rev(
     for (uint64_t id = 0; id < num_threads; id++)
         threads.emplace_back(dynamic_block_cyclic, id);
 
-    for (auto& thread : threads)
+    for (auto &thread : threads)
         thread.join();
 }
 
-void printImagePixels (std::vector<float> image, int n)
+void printImagePixels(std::vector<float> image, int n)
 {
     for (int i = 0; i < n; i++)
         std::cout << i << ": " << image[i] << "\n";
-
 }
 
-# include "chronoTimer.h"
+void printAndTimePairs(
+    char *name,
+    AllPairsWorker_t worker,
+    AllPairWorkerData_t *data)
+{
+    std::cout << name << "...\n";
+    StartTimer();
+    worker(data->mnist, data->allPairs, data->rows, data->cols, data->threads, data->chunksize);
+    std::cout << "\t " << name << " time = " << StopTimer() << "\n";
+    // std::cout << "\t all_pair[1000] = " << *(data->allPairs)[1000] << "\n\n";
+}
 
 int all_pairs(uint64_t nRows = 60000)
 {
-    // binary MNIST train-images dataset
-    const uint64_t rows = 60000;    // number of train images
-    const uint64_t cols = 28*28;    // resolution
-                                    // pixel (gray) value is stored in a float
-
-    // load MNIST train-image data from the binary file train-image.bin
+    //read data in
+    const uint64_t rows = 60000;
+    const uint64_t cols = 28 * 28;
     std::cout << "Load MNIST train-image dataset ......\n";
     StartTimer();
-    std::vector<float> mnist(rows*cols, 5); // values initialized to 5
-    load_binary(mnist.data(), rows*cols,
-       "./data/train-images.bin");
+    std::vector<float> mnist(rows * cols, 5); // values initialized to 5
+    load_binary(mnist.data(), rows * cols,
+                "./data/train-images.bin");
     StopTimer();
-
-    // verify the read data
-    std::cout << "mnist[156] = " << mnist[156] << "\n";  // the value should be 0.494118
-    //printImagePixels (mnist, 500);
-
-	if (nRows < 1 || nRows > rows)
+    
+    //validate data
+    if ((int)(mnist[156]*10000) != 4941)  // the value should be 0.494118
+        return 0;
+    if (nRows < 1 || nRows > rows)
         return -1;
 
-    std::cout << "\n\nCompute pair_wise_distance for first " << nRows <<
-        " MNIST train images (gcc) ...\n\n";
+    std::vector<float> all_pair(nRows * nRows);
 
-	// For nRows = 60,000, it requires about 14 GB of memory
-	std::vector<float> all_pair(nRows*nRows);
+    AllPairWorkerData_t data;
+    data.allPairs = all_pair;
+    data.mnist = mnist;
+    data.cols = cols;
+    data.rows = nRows;
+    data.threads = 20;
+    data.chunksize = 2;
 
-    // The sequential computing took about 30 min to complete
-    std::cout << "Starting sequential_all_pairs ...\n";
-	StartTimer ();
-        sequential_all_pairs(mnist, all_pair, nRows, cols);
-	std::cout << "\tsequential_all_pairs time = " << StopTimer() << "\n";
-	std::cout << "\tall_pair[1000] = " << all_pair[1000] << "\n\n";
+    std::cout << "\n\nCompute pair_wise_distance for first " << nRows << " MNIST train images (gcc) using "<< data.threads << " threads \n\n";
+    printAndTimePairs("block_all_pairs", block_all_pairs, &data);
+    printAndTimePairs("block_cyclic_all_pairs", block_cyclic_all_pairs, &data);
+    printAndTimePairs("dynamic_all_pairs", dynamic_all_pairs, &data);
 
-	// This block parallel version took about 260 seconds to complete
-    // the distance matrix computation for nRows = 60,000 using 12 threads
-    // on the DC 119 computers (compared with sequential version, which took
-    // about 30 minutes.
-
-	std::cout << "Starting block_all_pairs ...\n";
-    StartTimer();
-        //block_all_pairs(mnist, all_pair, nRows, cols, 12);
-    std::cout << "\tBlock_all_pairs time = " << StopTimer() << "\n";
-    std::cout << "\tall_pair[1000] = " << all_pair[1000] << "\n\n";
-
-    // This block-cyclic-parallel version took about 150 seconds to complete
-    // for nRows = 60,000 using 12 threads and chunk size 2 on DC119 computer
-    std::cout << "Starting block_cyclic_all_pairs ...\n";
-    StartTimer();
-        //block_cyclic_all_pairs(mnist, all_pair, nRows, cols, 12, 2);
-    std::cout << "\tblock_cyclic_all_pairs time = " << StopTimer() << "\n";
-    std::cout << "\tall_pair[1000] = " << all_pair[1000] << "\n\n";
-
-    // This dynamic-parallel version took about 140 seconds to complete
-    // for nRows = 60,000 using 12 threads and chunk size 2 on DC 119 computers
-    std::cout << "Starting dynamic_all_pairs ...\n";
-    StartTimer();
-	//dynamic_all_pairs(mnist, all_pair, nRows, cols,12,2);
-    std::cout << "\tdynamic_all_pairs time = " << StopTimer() << "\n";
-    std::cout << "\tall_pair[1000] = " << all_pair[1000] << "\n\n";
-
-    //dump_binary(mnist.data(), rows*rows, "./all_pairs.bin");
-
-	return 0;
+    return 0;
 }

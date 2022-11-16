@@ -11,7 +11,6 @@ int main()
     for (int i =0; i < 6; i++)
     {
         all_pairs(nRows[i]);
-
     }
 
     return 0;
