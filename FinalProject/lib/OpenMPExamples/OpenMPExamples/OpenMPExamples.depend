@@ -1,0 +1,119 @@
+# depslib dependency file v1.0
+1633354582 source:d:\class\c++\gcc\code_blocks_projects\openmpexamples\1_hello_world.cpp
+	<iostream>
+	<cstdint>
+	<omp.h>
+	<vector>
+	<thread>
+
+1633359424 source:d:\class\c++\gcc\code_blocks_projects\openmpexamples\2_matrix_vector.cpp
+	"include/hpc_helpers.hpp"
+	<iostream>
+	<cstdint>
+	<vector>
+	<omp.h>
+	<thread>
+	<algorithm>
+
+1568914632 d:\class\c++\gcc\code_blocks_projects\openmpexamples\include\hpc_helpers.hpp
+	<iostream>
+	<cstdint>
+	<chrono>
+	<type_traits>
+
+1634585222 source:d:\class\c++\gcc\code_blocks_projects\openmpexamples\main_openmpexamples.cpp
+	<iostream>
+
+1634585128 source:d:\class\c++\gcc\code_blocks_projects\openmpexamples\3_reduction.cpp
+	"include/hpc_helpers.hpp"
+	<vector>
+	<iostream>
+	<iomanip>
+	<cstdint>
+	<cmath>
+	<omp.h>
+	<thread>
+	<mutex>
+
+1634585161 source:d:\class\c++\gcc\code_blocks_projects\openmpexamples\main.cpp
+	<iostream>
+
+1633354584 source:d:\class\cse625\_codeblocks_projects\openmpexamples\1_hello_world.cpp
+	<iostream>
+	<cstdint>
+	<omp.h>
+	<vector>
+	<thread>
+
+1633359426 source:d:\class\cse625\_codeblocks_projects\openmpexamples\2_matrix_vector.cpp
+	"include/hpc_helpers.hpp"
+	<iostream>
+	<cstdint>
+	<vector>
+	<omp.h>
+	<thread>
+	<algorithm>
+
+1568914632 d:\class\cse625\_codeblocks_projects\openmpexamples\include\hpc_helpers.hpp
+	<iostream>
+	<cstdint>
+	<chrono>
+	<type_traits>
+
+1634585130 source:d:\class\cse625\_codeblocks_projects\openmpexamples\3_reduction.cpp
+	"include/hpc_helpers.hpp"
+	<vector>
+	<iostream>
+	<iomanip>
+	<cstdint>
+	<cmath>
+	<omp.h>
+	<thread>
+	<mutex>
+
+1634586066 source:d:\class\cse625\_codeblocks_projects\openmpexamples\4_simd.cpp
+	<iostream>
+	<omp.h>
+	<math.h>
+
+1668562699 source:c:\users\cmkle\git\cse625-parallel-programming\finalproject\lib\openmpexamples\openmpexamples\1_hello_world.cpp
+	<iostream>
+	<cstdint>
+	<omp.h>
+	<vector>
+	<thread>
+
+1668562699 source:c:\users\cmkle\git\cse625-parallel-programming\finalproject\lib\openmpexamples\openmpexamples\2_matrix_vector.cpp
+	"include/hpc_helpers.hpp"
+	<iostream>
+	<cstdint>
+	<vector>
+	<omp.h>
+	<thread>
+	<algorithm>
+
+1668562699 c:\users\cmkle\git\cse625-parallel-programming\finalproject\lib\openmpexamples\openmpexamples\include\hpc_helpers.hpp
+	<iostream>
+	<cstdint>
+	<chrono>
+	<type_traits>
+
+1668562699 source:c:\users\cmkle\git\cse625-parallel-programming\finalproject\lib\openmpexamples\openmpexamples\3_reduction.cpp
+	"include/hpc_helpers.hpp"
+	<vector>
+	<iostream>
+	<iomanip>
+	<cstdint>
+	<cmath>
+	<omp.h>
+	<thread>
+	<mutex>
+
+1668562699 source:c:\users\cmkle\git\cse625-parallel-programming\finalproject\lib\openmpexamples\openmpexamples\4_simd.cpp
+	<iostream>
+	<omp.h>
+	<math.h>
+
+1668562699 source:c:\users\cmkle\git\cse625-parallel-programming\finalproject\lib\openmpexamples\openmpexamples\main_openmpexamples.cpp
+	<iostream>
+
