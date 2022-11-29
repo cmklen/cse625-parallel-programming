@@ -385,12 +385,12 @@ int all_pairs(uint64_t nRows = 60000)
     data.chunksize = 2;
 
     std::cout << "\n\nCompute pair_wise_distance for first " << nRows << " MNIST train images (gcc) using " << data.threads << " threads \n\n";
-    //printAndTimePairs("block_all_pairs", block_all_pairs, &data);
+    printAndTimePairs("block_all_pairs", block_all_pairs, &data);
+    printAndTimePairs("block_cyclic_all_pairs", block_cyclic_all_pairs, &data);
+    printAndTimePairs("dynamic_all_pairs", dynamic_all_pairs, &data);
     printAndTimePairs("OpenMP_block_all_pairs", OpenMP_block_all_pairs, &data);
     printAndTimePairs("OpenMP_block_cyclic_all_pairs", OpenMP_block_cyclic_all_pairs, &data);
     printAndTimePairs("OpenMP_dynamic_all_pairs", OpenMP_dynamic_all_pairs, &data);
-    // printAndTimePairs("block_cyclic_all_pairs", block_cyclic_all_pairs, &data);
-    // printAndTimePairs("dynamic_all_pairs", dynamic_all_pairs, &data);
 
     return 0;
 }
