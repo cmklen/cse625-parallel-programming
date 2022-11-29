@@ -206,7 +206,6 @@ void OpenMP_block_all_pairs(
         const uint64_t str = num_threads * chunk_size;
 
 // for each block of size chunk_size in cyclic order
-        #pragma omp parallel for
         for (uint64_t lower = off; lower < rows; lower += str)
         {
             // compute the upper border of the block (exclusive)
@@ -215,12 +214,10 @@ void OpenMP_block_all_pairs(
             #pragma omp parallel for
             for (uint64_t i = lower; i < upper; i++)
             {
-                #pragma omp for
                 for (uint64_t I = 0; I <= i; I++)
                 {
                     // compute squared Euclidean distance
                     float accum = float(0);
-                    #pragma omp simd safelen(784)
                     for (uint64_t j = 0; j < COLS; j++)
                     {
                         float residue = mnist[i * COLS + j] - mnist[I * COLS + j];
@@ -241,117 +238,109 @@ void OpenMP_block_all_pairs(
     }
 }
 
-// // block cyclic work distribution
-// void OpenMP_block_cyclic_all_pairs(
-//     std::vector<float>&mnist,
-//     std::vector<float>&all_pair,
-//     uint64_t rows,
-//
-//     uint64_t num_threads = 64,
-//     uint64_t chunk_size = 64 / sizeof(float))
-// {
-//     auto block_cyclic = [&](const uint64_t &id) -> void
-//     {
-//         // pre-compute offset and stride
-//         const uint64_t off = id * chunk_size;
-//         const uint64_t str = num_threads * chunk_size;
+// block cyclic work distribution
+void OpenMP_block_cyclic_all_pairs(
+    std::vector<float>&mnist,
+    std::vector<float>&all_pair,
+    uint64_t rows,
 
-//         // for each block of size chunk_size in cyclic order
-//         for (uint64_t lower = off; lower < rows; lower += str)
-//         {
-//             // compute the upper border of the block (exclusive)
-//             const uint64_t upper = std::min(lower + chunk_size, rows);
+    uint64_t num_threads = 64,
+    uint64_t chunk_size = 64 / sizeof(float))
+{
+    auto block_cyclic = [&](const uint64_t &id) -> void
+    {
+        // pre-compute offset and stride
+        const uint64_t off = id * chunk_size;
+        const uint64_t str = num_threads * chunk_size;
 
-//             // for all entries below the diagonal (i'=I)
-//             for (uint64_t i = lower; i < upper; i++)
-//             {
-//                 for (uint64_t I = 0; I <= i; I++)
-//                 {
-//                     // compute squared Euclidean distance
-//                     float accum = float(0);
-//                     for (uint64_t j = 0; j < COLS; j++)
-//                     {
-//                         float residue = mnist[i * COLS + j] - mnist[I * COLS + j];
-//                         accum += residue * residue;
-//                     }
+        // for each block of size chunk_size in cyclic order
+        for (uint64_t lower = off; lower < rows; lower += str)
+        {
+            // compute the upper border of the block (exclusive)
+            const uint64_t upper = std::min(lower + chunk_size, rows);
 
-//                     // write Delta[i,i'] = Delta[i',i]
-//                     all_pair[i * rows + I] = all_pair[I * rows + i] = accum;
-//                 }
-//             }
-//         }
-//     };
+            // for all entries below the diagonal (i'=I)
+            #pragma omp parallel for
+            for (uint64_t i = lower; i < upper; i++)
+            {
+                for (uint64_t I = 0; I <= i; I++)
+                {
+                    // compute squared Euclidean distance
+                    float accum = float(0);
+                    for (uint64_t j = 0; j < COLS; j++)
+                    {
+                        float residue = mnist[i * COLS + j] - mnist[I * COLS + j];
+                        accum += residue * residue;
+                    }
 
-//     // business as usual
-//     std::vector<std::thread> threads;
+                    // write Delta[i,i'] = Delta[i',i]
+                    all_pair[i * rows + I] = all_pair[I * rows + i] = accum;
+                }
+            }
+        }
+    };
 
-//     for (uint64_t id = 0; id < num_threads; id++)
-//         threads.emplace_back(block_cyclic, id);
+    omp_set_num_threads(num_threads);
+    #pragma omp parallel
+    {
+        block_cyclic(omp_get_thread_num());
+    }
+}
 
-//     for (auto &thread : threads)
-//         thread.join();
-// }
+void OpenMP_dynamic_all_pairs(
+    std::vector<float> &mnist,
+    std::vector<float> &all_pair,
+    uint64_t rows,
+    uint64_t num_threads = 64,
+    uint64_t chunk_size = 64 / sizeof(float))
+{
+    // declare mutex and current lower index
+    uint64_t global_lower = 0;
 
-// std::mutex mutex;
+    auto dynamic_block_cyclic = [&](const uint64_t &id) -> void
+    {
+        // assume we have not done anything
+        uint64_t lower = 0;
 
-// void OpenMP_dynamic_all_pairs(
-//     std::vector<float> &mnist,
-//     std::vector<float> &all_pair,
-//     uint64_t rows,
-//
-//     uint64_t num_threads = 64,
-//     uint64_t chunk_size = 64 / sizeof(float))
-// {
-//     // declare mutex and current lower index
-//     uint64_t global_lower = 0;
+        // while there are still rows to compute
+        while (lower < rows)
+        {
+            // update lower row with global lower row
+            {
+                std::lock_guard<std::mutex> lock_guard(mutex);
+                lower = global_lower;
+                global_lower += chunk_size;
+            }
 
-//     auto dynamic_block_cyclic = [&](const uint64_t &id) -> void
-//     {
-//         // assume we have not done anything
-//         uint64_t lower = 0;
+            // compute the upper border of the block (exclusive)
+            const uint64_t upper = std::min(lower + chunk_size, rows);
 
-//         // while there are still rows to compute
-//         while (lower < rows)
-//         {
-//             // update lower row with global lower row
-//             {
-//                 std::lock_guard<std::mutex> lock_guard(mutex);
-//                 lower = global_lower;
-//                 global_lower += chunk_size;
-//             }
+            // for all entries below the diagonal (i'=I)
+            for (uint64_t i = lower; i < upper; i++)
+            {
+                for (uint64_t I = 0; I <= i; I++)
+                {
+                    // compute squared Euclidean distance
+                    float accum = float(0);
+                    for (uint64_t j = 0; j < COLS; j++)
+                    {
+                        float residue = mnist[i * COLS + j] - mnist[I * COLS + j];
+                        accum += residue * residue;
+                    }
 
-//             // compute the upper border of the block (exclusive)
-//             const uint64_t upper = std::min(lower + chunk_size, rows);
+                    // write Delta[i,i'] = Delta[i',i]
+                    all_pair[i * rows + I] = all_pair[I * rows + i] = accum;
+                }
+            }
+        }
+    };
 
-//             // for all entries below the diagonal (i'=I)
-//             for (uint64_t i = lower; i < upper; i++)
-//             {
-//                 for (uint64_t I = 0; I <= i; I++)
-//                 {
-//                     // compute squared Euclidean distance
-//                     float accum = float(0);
-//                     for (uint64_t j = 0; j < COLS; j++)
-//                     {
-//                         float residue = mnist[i * COLS + j] - mnist[I * COLS + j];
-//                         accum += residue * residue;
-//                     }
-
-//                     // write Delta[i,i'] = Delta[i',i]
-//                     all_pair[i * rows + I] = all_pair[I * rows + i] = accum;
-//                 }
-//             }
-//         }
-//     };
-
-//     // business as usual
-//     std::vector<std::thread> threads;
-
-//     for (uint64_t id = 0; id < num_threads; id++)
-//         threads.emplace_back(dynamic_block_cyclic, id);
-
-//     for (auto &thread : threads)
-//         thread.join();
-// }
+    omp_set_num_threads(num_threads);
+    #pragma omp parallel
+    {
+        dynamic_block_cyclic(omp_get_thread_num());
+    }
+}
 
 void printImagePixels(std::vector<float> image, int n)
 {
@@ -368,6 +357,7 @@ void printAndTimePairs(
     StartTimer();
     Worker(data->mnist, data->allPairs, data->rows, data->threads, data->chunksize);
     std::cout << "\t " << name << " time = " << StopTimer() << "\n";
+    std::cout << "\tall_pair[1000] = " << data->allPairs[1000] << "\n\n";
 }
 
 int all_pairs(uint64_t nRows = 60000)
@@ -395,8 +385,10 @@ int all_pairs(uint64_t nRows = 60000)
     data.chunksize = 2;
 
     std::cout << "\n\nCompute pair_wise_distance for first " << nRows << " MNIST train images (gcc) using " << data.threads << " threads \n\n";
-    printAndTimePairs("block_all_pairs", block_all_pairs, &data);
+    //printAndTimePairs("block_all_pairs", block_all_pairs, &data);
     printAndTimePairs("OpenMP_block_all_pairs", OpenMP_block_all_pairs, &data);
+    printAndTimePairs("OpenMP_block_cyclic_all_pairs", OpenMP_block_cyclic_all_pairs, &data);
+    printAndTimePairs("OpenMP_dynamic_all_pairs", OpenMP_dynamic_all_pairs, &data);
     // printAndTimePairs("block_cyclic_all_pairs", block_cyclic_all_pairs, &data);
     // printAndTimePairs("dynamic_all_pairs", dynamic_all_pairs, &data);
 
