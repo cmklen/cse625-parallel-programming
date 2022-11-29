@@ -381,7 +381,7 @@ int all_pairs(uint64_t nRows = 60000)
     data.allPairs = all_pair;
     data.mnist = mnist;
     data.rows = nRows;
-    data.threads = 20;
+    data.threads = 12;
     data.chunksize = 2;
 
     std::cout << "\n\nCompute pair_wise_distance for first " << nRows << " MNIST train images (gcc) using " << data.threads << " threads \n\n";
