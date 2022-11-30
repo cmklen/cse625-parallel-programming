@@ -1,2 +1,4 @@
 *.exe
 *.bin
+list_attr_celeba_2.csv
+celebA_Explore.ipynb
