@@ -273,7 +273,7 @@ void printAndTimePairs(
 {
     std::cout << name << "...\n";
     StartTimer();
-    Worker(data->mnist, data->allPairs, data->rows, data->threads, 0);
+    Worker(data->mnist, data->allPairs, data->rows, data->threads, data->chunksize);
     std::cout << "\t " << name << " time = " << StopTimer() << "\n";
     std::cout << "\tall_pair[1000] = " << data->allPairs[1000] << "\n\n";
 }
