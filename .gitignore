@@ -1,5 +1,6 @@
 *.exe
 *.bin
+*.jpg
 list_attr_celeba_2.csv
 celebA_Explore.ipynb
 img_align_celba/**
